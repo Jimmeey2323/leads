@@ -108,8 +108,13 @@ document.addEventListener("DOMContentLoaded", function() {
                 body: JSON.stringify(loginPayload)
             });
 
+            // Log the status and response text for detailed inspection
+            console.log('Login response status:', loginResponse.status);
+            const responseBody = await loginResponse.text();
+            console.log('Login response body:', responseBody);
+
             if (!loginResponse.ok) {
-                throw new Error('Authentication failed.');
+                throw new Error('Authentication failed. Status: ' + loginResponse.status + ', Response: ' + responseBody);
             }
 
             const cookie = loginResponse.headers.get('set-cookie');
