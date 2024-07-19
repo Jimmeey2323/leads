@@ -4,14 +4,14 @@ document.addEventListener('DOMContentLoaded', function() {
         'https://api.momence.com/host/13752/customer-leads'
     ];
 
-    async function fetchData(apiUrl, token, page = 0, pageSize = 200) {
+    async function fetchData(apiUrl, page = 0, pageSize = 200) {
         const response = await fetch(`${apiUrl}?page=${page}&pageSize=${pageSize}&query=`, {
             method: 'GET',
             headers: {
                 'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            }
+                'Content-Type': 'application/json'
+            },
+            credentials: 'include' // Include cookies in the request
         });
         if (!response.ok) {
             throw new Error(`Failed to fetch data: ${response.statusText}`);
@@ -20,35 +20,36 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function authenticate() {
-    try {
-        const response = await fetch('https://api.momence.com/auth/login', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                email: 'jimmeey@physique57india.com',
-                password: 'Jimmeey@123'
-            })
-        });
+        try {
+            const response = await fetch('https://api.momence.com/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    email: 'jimmeey@physique57india.com',
+                    password: 'Jimmeey@123'
+                }),
+                credentials: 'include' // Ensure cookies are included in the response
+            });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`Authentication failed: ${response.statusText} - ${errorText}`);
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`Authentication failed: ${response.statusText} - ${errorText}`);
+            }
+
+            // No need to return token as cookies are handled automatically
+            return true;
+        } catch (error) {
+            console.error('Authentication error:', error);
+            return false;
         }
-
-        const data = await response.json();
-        return data.token; // Assuming the token is returned in the response
-    } catch (error) {
-        console.error('Authentication error:', error);
-        return null;
     }
-}
 
     async function loadTableData() {
-        const token = await authenticate();
-        if (!token) {
+        const authenticated = await authenticate();
+        if (!authenticated) {
             console.error('Authentication failed.');
             return;
         }
@@ -60,7 +61,7 @@ document.addEventListener('DOMContentLoaded', function() {
             let page = 0;
             while (true) {
                 try {
-                    const data = await fetchData(apiUrl, token, page);
+                    const data = await fetchData(apiUrl, page);
                     if (!data.payload || data.payload.length === 0) {
                         break;
                     }
