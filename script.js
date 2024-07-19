@@ -20,28 +20,31 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function authenticate() {
-        try {
-            const response = await fetch('https://api.momence.com/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: 'jimmeey@physique57india.com',
-                    password: 'Jimmeey@123'
-                })
-            });
-            if (!response.ok) {
-                throw new Error(`Authentication failed: ${response.statusText}`);
-            }
-            const data = await response.json();
-            return data.token; // Assuming the token is returned in the response
-        } catch (error) {
-            console.error('Authentication error:', error);
-            return null;
+    try {
+        const response = await fetch('https://api.momence.com/auth/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                email: 'jimmeey@physique57india.com',
+                password: 'Jimmeey@123'
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Authentication failed: ${response.statusText} - ${errorText}`);
         }
+
+        const data = await response.json();
+        return data.token; // Assuming the token is returned in the response
+    } catch (error) {
+        console.error('Authentication error:', error);
+        return null;
     }
+}
 
     async function loadTableData() {
         const token = await authenticate();
