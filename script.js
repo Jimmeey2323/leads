@@ -20,32 +20,32 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     async function authenticate() {
-        try {
-            const response = await fetch('https://api.momence.com/auth/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({
-                    email: 'jimmeey@physique57india.com',
-                    password: 'Jimmeey@123'
-                }),
-                credentials: 'include' // Ensure cookies are included in the response
-            });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`Authentication failed: ${response.statusText} - ${errorText}`);
-            }
-
-            // No need to return token as cookies are handled automatically
-            return true;
-        } catch (error) {
-            console.error('Authentication error:', error);
-            return false;
-        }
+  try {
+    const loginHeaders = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    };
+    const loginPayload = {
+      email: 'jimmeey@physique57india.com',
+      password: 'Jimmeey@123'
+    };
+    const loginOptions = {
+      method: 'POST',
+      headers: loginHeaders,
+      payload: JSON.stringify(loginPayload),
+      muteHttpExceptions: true
+    };
+    const loginResponse = UrlFetchApp.fetch('https://api.momence.com/auth/login', loginOptions);
+    if (loginResponse.getResponseCode() !== 200) {
+      logError('Authentication failed.');
+      return null;
     }
+    return loginResponse.getHeaders()['Set-Cookie'];
+  } catch (error) {
+    logError('An error occurred during authentication: ' + error.message);
+    return null;
+  }
+}
 
     async function loadTableData() {
         const authenticated = await authenticate();
